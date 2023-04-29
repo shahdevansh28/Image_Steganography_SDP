@@ -125,7 +125,7 @@ def lsb_showData(image):
             binary_data += g[-1]
             binary_data += b[-1]
     all_bytes = [binary_data[i:i+8] for i in range(0, len(binary_data), 8)]
-    print(all_bytes)
+
     decoded_data = ""
     for byte in all_bytes:
         decoded_data += chr(int(byte, 2))
@@ -437,7 +437,7 @@ def image_view(request):
                 image = cv2.imread(data['image'])
                 print("image given to ... is", image)
                 encoded_image = pvd_hidedata(image, data['msg'])
-                cv2.imwrite("media/images/hidden.png", encoded_image)
+                cv2.imwrite("media/images/pvd_hidden.png", encoded_image)
                 data['image'] = "media/images/"+"pvd_hidden.png"
             # EMD
             #Here comes the embedding algorithm
@@ -462,40 +462,38 @@ def stego(request, data):
 def extraction(request):
     
     if request.method == 'POST':
-        img = request.FILES.get('Img')
-        choice = request.POST.get('choice')
-        imgn = img.name
-        stego = "media/images/"+imgn
-        print(stego)
-        dlen = request.session.get('dlen')
-        print(dlen)
-        embedded_image = cv2.imread(stego)
-        data = {}
-        data['msg'] = ""
-        data['Img'] = stego
-        
-        if choice == 0:
+        img=request.FILES.get('Img')
+        choice=request.POST.get('choice')
+        print(choice)
+        imgn=img.name
+        stego="media/images/"+imgn
+        # print(stego)
+        dlen=request.session.get('dlen')
+        # print(dlen)
+        embedded_image=cv2.imread(stego)
+        # decoded_data=lsb_showData(embedded_image)
+        # print("Decoded data in string : ",decoded_data)
+        data={}
+        # data['msg']=decoded_data
+        data['Img']=stego
+
+        if choice == '0':
             print("LSB")
-            decoded_data = lsb_showData(embedded_image)
-            data = {}
-            data['msg'] = decoded_data
-            data['Img'] = stego
-            return render(request, 'Actualmsg.html', {'data': data})
-        elif choice == 1:
-            print("DWT")
-        elif choice == 2:
-            print("PVD")
-            decoded_data = pvd_decode_data(embedded_image, dlen)
-            print("Decoded data in string : ", decoded_data)
-            data = {}
-            data['msg'] = decoded_data
-            data['Img'] = stego
+            decoded_data=lsb_showData(embedded_image)
+            data['msg']=decoded_data
         
-        # Extraction for other algorithms is remaining.
-        # Here extraction algorithm
-        elif choice == 3:
+        elif choice == '1':
+            print("DWT")
+
+        elif choice == '2':
+            print("PVD")
+            decoded_data=pvd_decode_data(embedded_image,dlen)
+            data['msg'] = decoded_data
+        
+        elif choice == '3':
             print("EMD")
 
-        return render(request, 'Actualmsg.html', {'data': data})
+        return render(request ,'Actualmsg.html', {'data' : data })
+
     else:
         return render(request, 'extraction.html')
